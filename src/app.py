@@ -1,8 +1,10 @@
 """
-NetSage AI - Modern Operations & Diagnostic Dashboard (app.py)
-Theme-aware (Dark Espresso / Warm Paper Light) with guided 3-step workflow,
-live Google Gemini LLM API integration, 10-Lab Packet Tracer stress testing suite,
-and author metadata for Shivanshu Yadav.
+NetSage AI - Unified Modern Diagnostic Platform (app.py)
+Streamlined architecture:
+- Unified Studio (Presets & Custom Scenarios in ONE unified UI)
+- Persistent API Key storage via .env
+- Comprehensive Metrics & Responsible AI Audit Trail
+- Authored by Shivanshu Yadav for Cisco AICTE VIP 2026 (AI Track)
 """
 
 import sys
@@ -14,6 +16,7 @@ import pandas as pd
 import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
+from dotenv import load_dotenv, set_key
 
 # Add root directory to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -29,12 +32,16 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# Load environment variables
+ENV_PATH = Path(__file__).parent.parent / ".env"
+load_dotenv(dotenv_path=ENV_PATH)
+
 # Session state initialization
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark (Espresso)"
 
 if "use_live_llm" not in st.session_state:
-    st.session_state.use_live_llm = False
+    st.session_state.use_live_llm = bool(os.environ.get("GEMINI_API_KEY"))
 
 if "gemini_api_key" not in st.session_state:
     st.session_state.gemini_api_key = os.environ.get("GEMINI_API_KEY", "")
@@ -43,26 +50,45 @@ if "audit_trail" not in st.session_state:
     st.session_state.audit_trail = [
         {
             "case_id": "NET-001",
+            "scenario_type": "Preset Lab",
             "decision": "Approved",
             "reviewer": "Shivanshu Yadav (NetOps)",
+            "ai_suggested_commands": "interface Gi0/0.10\nno shutdown",
+            "final_deployed_commands": "interface Gi0/0.10\nno shutdown",
             "notes": "Verified sub-interface admin down state and approved 'no shutdown'.",
             "timestamp": "2026-08-21 14:10:00"
         },
         {
             "case_id": "NET-015",
+            "scenario_type": "Preset Lab (Stress Test)",
             "decision": "Edited",
             "reviewer": "Shivanshu Yadav (Senior NetOps)",
+            "ai_suggested_commands": "ip route 172.16.0.0 255.255.255.0 10.0.0.5",
+            "final_deployed_commands": "no ip route 172.16.0.0 255.255.0.0 10.0.0.5\nip route 172.16.0.0 255.255.0.0 10.0.0.2",
             "notes": "Corrected static route next-hop to active gateway 10.0.0.2.",
             "timestamp": "2026-08-21 14:15:30"
         },
         {
             "case_id": "NET-016",
+            "scenario_type": "Preset Lab (Stress Test)",
             "decision": "Edited",
             "reviewer": "Shivanshu Yadav (Security Lead)",
+            "ai_suggested_commands": "access-list 100 permit tcp 192.168.1.0 0.0.0.255 host 10.0.0.25 eq 20",
+            "final_deployed_commands": "access-list 100 permit tcp 192.168.1.0 0.0.0.255 host 10.0.0.25 eq 21",
             "notes": "Added both FTP control port 21 and data port 20 to ACL 100.",
             "timestamp": "2026-08-21 14:22:10"
         }
     ]
+
+# Helper to load dataset
+@st.cache_data
+def load_dataset():
+    csv_path = Path(__file__).parent.parent / "data" / "cases.csv"
+    if csv_path.exists():
+        return pd.read_csv(csv_path)
+    return pd.DataFrame()
+
+df_cases = load_dataset()
 
 # Sidebar Navigation & Settings
 with st.sidebar:
@@ -88,15 +114,13 @@ with st.sidebar:
     
     st.markdown("---")
     
-    # Navigation Radio
+    # Navigation Radio (Clean, Unified 3-view layout)
     nav_choice = st.radio(
         "Navigation",
         [
-            "1. Case Diagnostic Studio",
-            "2. Custom Telemetry Sandbox",
-            "3. 10-Lab Stress Test Suite",
-            "4. Metrics & Analytics",
-            "5. Responsible AI Audit Log"
+            "1. Diagnostic Studio (Presets & Custom)",
+            "2. Metrics & Distribution Analytics",
+            "3. Responsible AI Audit Log"
         ],
         index=0
     )
@@ -108,11 +132,26 @@ with st.sidebar:
     st.session_state.use_live_llm = live_toggle
     
     if live_toggle:
-        user_key = st.text_input("Gemini API Key:", value=st.session_state.gemini_api_key, type="password", placeholder="AIzaSy...")
-        st.session_state.gemini_api_key = user_key
-        st.caption("Using Google Gemini (`gemini-2.5-flash`) for real-time prompt reasoning.")
+        user_key = st.text_input(
+            "Gemini API Key:",
+            value=st.session_state.gemini_api_key,
+            type="password",
+            placeholder="AIzaSy...",
+            help="Your API key is automatically saved locally to .env and will persist across refreshes."
+        )
+        if user_key != st.session_state.gemini_api_key:
+            st.session_state.gemini_api_key = user_key
+            # Persist key to .env
+            try:
+                if not ENV_PATH.exists():
+                    ENV_PATH.touch()
+                set_key(str(ENV_PATH), "GEMINI_API_KEY", user_key)
+                st.success("API Key saved to .env!")
+            except Exception:
+                pass
+        st.caption("Model: `gemini-2.5-flash` with structured Pydantic JSON schema.")
     else:
-        st.caption("Running in fast offline domain synthesis mode.")
+        st.caption("Running in offline deterministic expert synthesis mode.")
     
     st.markdown("---")
     st.markdown("""
@@ -447,16 +486,6 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
-# Helper to load dataset
-@st.cache_data
-def load_dataset():
-    csv_path = Path(__file__).parent.parent / "data" / "cases.csv"
-    if csv_path.exists():
-        return pd.read_csv(csv_path)
-    return pd.DataFrame()
-
-df_cases = load_dataset()
-
 # Top Header
 st.markdown("""
 <div class="enscribe-header">
@@ -470,290 +499,264 @@ st.markdown("""
 
 
 # ==============================================================================
-# VIEW 1: CASE DIAGNOSTIC STUDIO (GUIDED 3-STEP WORKFLOW)
+# VIEW 1: UNIFIED DIAGNOSTIC STUDIO (PRESETS & CUSTOM SCENARIOS IN ONE UI)
 # ==============================================================================
-if nav_choice == "1. Case Diagnostic Studio":
-    if df_cases.empty:
-        st.error("Dataset `data/cases.csv` not found.")
+if nav_choice == "1. Diagnostic Studio (Presets & Custom)":
+    # Stepper
+    st.markdown("""
+    <div class="step-stepper">
+        <div class="step-item active"><span>①</span> Select Preset or Custom Mode</div>
+        <div class="step-item" style="color: #D9A05B;"><span>➔</span></div>
+        <div class="step-item active"><span>②</span> Inspect Evidence & AI Diagnosis</div>
+        <div class="step-item" style="color: #D9A05B;"><span>➔</span></div>
+        <div class="step-item active"><span>③</span> Review & Human Sign-off</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Mode Toggle: Preset vs Custom Input
+    mode_col1, mode_col2 = st.columns([1, 2])
+    with mode_col1:
+        input_mode = st.radio(
+            "Telemetry Source Mode:",
+            ["Preset Lab Scenarios (30 Cases)", "Custom Packet Tracer Telemetry (Live Sandbox)"],
+            index=0,
+            horizontal=False
+        )
+
+    if input_mode == "Preset Lab Scenarios (30 Cases)":
+        if df_cases.empty:
+            st.error("Dataset `data/cases.csv` not found.")
+        else:
+            col_s1, col_s2 = st.columns([3, 2])
+            with col_s1:
+                # Group 30 cases with stress-test tags
+                case_options = [
+                    f"{row['case_id']} — {row['symptom']}" + (" [⚡ STRESS TEST]" if row['case_id'] in ['NET-001','NET-004','NET-015','NET-016','NET-018','NET-020','NET-022','NET-025','NET-026'] else "")
+                    for _, row in df_cases.iterrows()
+                ]
+                selected_str = st.selectbox("Select Scenario from 30-Case Test Suite:", case_options)
+                selected_id = selected_str.split(" — ")[0]
+                case_data = df_cases[df_cases["case_id"] == selected_id].iloc[0]
+
+                symptom_val = str(case_data['symptom'])
+                topo_val = str(case_data['topology_note'])
+                show_val = str(case_data['show_outputs'])
+                case_id_val = case_data['case_id']
+                scenario_label = f"Preset ({case_data['case_id']})"
+
+            with col_s2:
+                st.markdown("<div style='margin-top: 26px;'></div>", unsafe_allow_html=True)
+                sev_pill = "pill-coral" if case_data['severity'] == "High" else ("pill-gold" if case_data['severity'] == "Medium" else "pill-sage")
+                st.markdown(f"""
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <span class="enscribe-pill pill-cyan">{case_data['osi_layer']}</span>
+                    <span class="enscribe-pill pill-gold">{case_data['concept_tag']}</span>
+                    <span class="enscribe-pill {sev_pill}">{case_data['severity']} Severity</span>
+                    <span class="enscribe-pill pill-muted">{case_data['case_id']}</span>
+                </div>
+                """, unsafe_allow_html=True)
     else:
-        # Stepper
-        st.markdown("""
-        <div class="step-stepper">
-            <div class="step-item active"><span>①</span> Select Case</div>
-            <div class="step-item" style="color: #D9A05B;"><span>➔</span></div>
-            <div class="step-item active"><span>②</span> Inspect Evidence & AI Diagnosis</div>
-            <div class="step-item" style="color: #D9A05B;"><span>➔</span></div>
-            <div class="step-item active"><span>③</span> Review & Human Sign-off</div>
+        # Custom Telemetry Mode
+        scenario_label = "Custom Lab Telemetry"
+        case_id_val = "CUSTOM-TEST"
+        col_c1, col_c2 = st.columns([1, 1])
+        with col_c1:
+            symptom_val = st.text_input("Observed Symptom:", value="PC in Accounting unable to ping Default Gateway on sub-interface")
+            topo_val = st.text_area("Topology & Configuration Notes:", value="PC IP 192.168.20.50/24; Switch Fa0/5 connected to Router Gi0/0.20", height=90)
+        with col_c2:
+            show_val = st.text_area("Cisco IOS Show Commands / Log Outputs:", value="interface GigabitEthernet0/0.20\n ip address 192.168.20.1 255.255.255.0\n (missing encapsulation dot1Q 20)", height=150)
+
+    st.markdown("---")
+
+    # Unified Two-Column Guided Layout: Left (Evidence) -> Right (AI Diagnosis & HITL Gate)
+    c_left, c_right = st.columns([1, 1], gap="large")
+
+    with c_left:
+        st.markdown("### 📥 Step 1: Raw Lab Evidence & Observations")
+        st.caption("What the network reports: observed symptoms, topology layout, and captured CLI outputs.")
+
+        # Symptom Card
+        st.markdown(f"""
+        <div class="enscribe-card">
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; margin-bottom: 4px; opacity: 0.7;">Observed Symptom</div>
+            <div style="font-family: 'Newsreader', serif; font-size: 1.15rem; line-height: 1.4; margin-bottom: 10px;">
+                "{symptom_val}"
+            </div>
+            <div style="font-size: 0.86rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 8px;">
+                <b style="font-family: monospace; color: #8A5B20;">TOPOLOGY CONTEXT:</b> {topo_val}
+            </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # Case selection row
-        col_s1, col_s2 = st.columns([3, 2])
-        with col_s1:
-            case_options = [f"{row['case_id']} — {row['symptom']}" for _, row in df_cases.iterrows()]
-            selected_str = st.selectbox("Select Troubleshooting Lab Scenario:", case_options)
-            selected_id = selected_str.split(" — ")[0]
-            case_data = df_cases[df_cases["case_id"] == selected_id].iloc[0]
+        # Raw CLI Show Output
+        st.markdown("<div style='font-family: monospace; font-size: 0.75rem; text-transform: uppercase;'>Captured CLI Show Output</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="enscribe-terminal">{show_val}</div>
+        """, unsafe_allow_html=True)
 
-        with col_s2:
-            st.markdown("<div style='margin-top: 26px;'></div>", unsafe_allow_html=True)
-            sev_pill = "pill-coral" if case_data['severity'] == "High" else ("pill-gold" if case_data['severity'] == "Medium" else "pill-sage")
+        # Deterministic Rule Engine Check
+        rule_res = run_deterministic_checks(
+            show_output=show_val,
+            topology_note=topo_val,
+            symptom=symptom_val
+        )
+
+        if rule_res["status"] == "ERRORS_DETECTED":
+            findings_list = "".join([
+                f"<div style='margin-bottom: 6px;'>• <b>[{f['rule_id']}] {f['title']}</b> ({f['osi_layer']})<br><span style='font-size: 0.82rem;'>{f['remediation_hint']}</span></div>"
+                for f in rule_res["findings"]
+            ])
             st.markdown(f"""
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                <span class="enscribe-pill pill-cyan">{case_data['osi_layer']}</span>
-                <span class="enscribe-pill pill-gold">{case_data['concept_tag']}</span>
-                <span class="enscribe-pill {sev_pill}">{case_data['severity']} Severity</span>
-                <span class="enscribe-pill pill-muted">{case_data['case_id']}</span>
+            <div class="enscribe-callout">
+                <div class="enscribe-callout-title">✦ Deterministic Rule Match ({rule_res['findings_count']} detected)</div>
+                <div class="enscribe-callout-body">{findings_list}</div>
+            </div>
+            """, unsafe_allow_html=True)
+        else:
+            st.markdown("""
+            <div class="enscribe-card" style="padding: 12px 16px;">
+                <span style="font-family: monospace; font-size: 0.82rem; font-weight: 600; color: #238596;">✦ Deterministic Syntax Clean</span>
+                <span style="font-size: 0.82rem; opacity: 0.75;"> — Passed directly to Semantic LLM Reasoning Engine.</span>
             </div>
             """, unsafe_allow_html=True)
 
+    with c_right:
+        st.markdown("### 🤖 Step 2: AI Diagnosis & Solution")
+        
+        # Execute Hybrid Diagnosis
+        diag_res = diagnose_case(
+            symptom=symptom_val,
+            topology_note=topo_val,
+            show_output=show_val,
+            case_id=case_id_val,
+            use_live_llm=st.session_state.use_live_llm,
+            api_key=st.session_state.gemini_api_key
+        )
+        diag = diag_res["diagnosis"]
+
+        st.caption(f"Inference Mode: **{diag_res['engine_mode']}**")
+
+        # AI Diagnosis Box
+        st.markdown(f"""
+        <div class="enscribe-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-family: 'Newsreader', serif; font-size: 1.25rem; color: #D9A05B; font-weight: 600;">Identified Root Cause</span>
+                <span class="enscribe-pill pill-cyan">{diag['osi_layer']}</span>
+            </div>
+            <div style="font-family: 'Newsreader', serif; font-size: 1.1rem; line-height: 1.5; margin-bottom: 12px;">
+                {diag['root_cause']}
+            </div>
+            <div style="display: flex; gap: 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 8px;">
+                <div>Confidence: <b style="color: #2E8555;">{diag['confidence']}</b></div>
+                <div>Rule Status: <i>{diag_res['deterministic_status']}</i></div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Quoted Evidence Citation
+        st.markdown("<div style='font-family: monospace; font-size: 0.75rem; text-transform: uppercase;'>Quoted Evidence from Telemetry</div>", unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="enscribe-terminal" style="border-left: 2px solid #D9A05B; font-weight: 500;">
+            "{diag['evidence']}"
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Next Command
+        st.markdown("<div style='font-family: monospace; font-size: 0.75rem; text-transform: uppercase;'>Next Recommended Verification Command</div>", unsafe_allow_html=True)
+        st.code(diag['next_command'], language="bash")
+
+        # Remediation Commands
+        st.markdown("<div style='font-family: monospace; font-size: 0.75rem; text-transform: uppercase;'>Proposed Cisco IOS Remediation Commands</div>", unsafe_allow_html=True)
+        cli_text = "\n".join(diag['fix_steps'])
+
+        # ==========================================================
+        # STEP 3: HUMAN-IN-THE-LOOP ACTION GATE
+        # ==========================================================
         st.markdown("---")
+        st.markdown("### 🛡️ Step 3: Human Verification & Sign-Off Gate")
+        st.caption("Review the proposed configuration commands. Choose to approve, edit, or reject.")
 
-        # Two-Column Layout
-        c_left, c_right = st.columns([1, 1], gap="large")
+        edit_active = st.toggle("✏️ Enable Manual CLI Command Override", value=False, key="toggle_unified_edit")
 
-        with c_left:
-            st.markdown("### 📥 Step 1: Raw Lab Evidence & Observations")
-            st.caption("What the network reports: observed symptoms, topology layout, and captured CLI outputs.")
+        if edit_active:
+            edited_cli = st.text_area("Edit Cisco IOS Commands:", value=cli_text, height=110, key="edit_unified_box")
+        else:
+            st.code(cli_text, language="cisco")
+            edited_cli = cli_text
 
-            # Symptom Card
-            st.markdown(f"""
-            <div class="enscribe-card">
-                <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; text-transform: uppercase; margin-bottom: 4px; opacity: 0.7;">Observed Symptom</div>
-                <div style="font-family: 'Newsreader', serif; font-size: 1.15rem; line-height: 1.4; margin-bottom: 10px;">
-                    "{case_data['symptom']}"
-                </div>
-                <div style="font-size: 0.86rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 8px;">
-                    <b style="font-family: monospace; color: #8A5B20;">TOPOLOGY CONTEXT:</b> {case_data['topology_note']}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+        col_b1, col_b2, col_b3 = st.columns(3)
+        with col_b1:
+            if st.button("✅ Approve & Deploy", use_container_width=True, type="primary", key="btn_app_unified"):
+                st.session_state.audit_trail.append({
+                    "case_id": case_id_val,
+                    "scenario_type": scenario_label,
+                    "decision": "Approved" if not edit_active else "Approved (Edited)",
+                    "reviewer": "Shivanshu Yadav (NetOps)",
+                    "ai_suggested_commands": cli_text,
+                    "final_deployed_commands": edited_cli,
+                    "notes": f"Verified and certified for Packet Tracer deployment: {symptom_val[:60]}",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                })
+                st.session_state.last_studio_action = {
+                    "type": "approved",
+                    "cli": edited_cli
+                }
+                st.balloons()
 
-            # Raw CLI Show Output
-            st.markdown("<div style='font-family: monospace; font-size: 0.75rem; text-transform: uppercase;'>Captured CLI Show Output</div>", unsafe_allow_html=True)
-            st.markdown(f"""
-            <div class="enscribe-terminal">{case_data['show_outputs']}</div>
-            """, unsafe_allow_html=True)
+        with col_b2:
+            if st.button("💾 Save Override", use_container_width=True, key="btn_edit_unified"):
+                st.session_state.audit_trail.append({
+                    "case_id": case_id_val,
+                    "scenario_type": scenario_label,
+                    "decision": "Edited",
+                    "reviewer": "Shivanshu Yadav (Senior Lead)",
+                    "ai_suggested_commands": cli_text,
+                    "final_deployed_commands": edited_cli,
+                    "notes": f"Human override saved: {edited_cli.splitlines()[-1] if edited_cli else 'Custom fix'}",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                })
+                st.session_state.last_studio_action = {
+                    "type": "edited",
+                    "cli": edited_cli
+                }
 
-            # Deterministic Rule Engine Check
-            rule_res = run_deterministic_checks(
-                show_output=str(case_data['show_outputs']),
-                topology_note=str(case_data['topology_note']),
-                symptom=str(case_data['symptom'])
-            )
+        with col_b3:
+            if st.button("❌ Reject", use_container_width=True, key="btn_rej_unified"):
+                st.session_state.audit_trail.append({
+                    "case_id": case_id_val,
+                    "scenario_type": scenario_label,
+                    "decision": "Rejected",
+                    "reviewer": "Shivanshu Yadav (QA Lead)",
+                    "ai_suggested_commands": cli_text,
+                    "final_deployed_commands": "None (Rejected)",
+                    "notes": "Diagnosis rejected due to ambiguity or alternative root cause.",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                })
+                st.session_state.last_studio_action = {
+                    "type": "rejected",
+                    "cli": None
+                }
 
-            if rule_res["status"] == "ERRORS_DETECTED":
-                findings_list = "".join([
-                    f"<div style='margin-bottom: 6px;'>• <b>[{f['rule_id']}] {f['title']}</b> ({f['osi_layer']})<br><span style='font-size: 0.82rem;'>{f['remediation_hint']}</span></div>"
-                    for f in rule_res["findings"]
-                ])
-                st.markdown(f"""
-                <div class="enscribe-callout">
-                    <div class="enscribe-callout-title">✦ Deterministic Rule Match ({rule_res['findings_count']} detected)</div>
-                    <div class="enscribe-callout-body">{findings_list}</div>
-                </div>
-                """, unsafe_allow_html=True)
-            else:
-                st.markdown("""
-                <div class="enscribe-card" style="padding: 12px 16px;">
-                    <span style="font-family: monospace; font-size: 0.82rem; font-weight: 600; color: #238596;">✦ Deterministic Syntax Clean</span>
-                    <span style="font-size: 0.82rem; opacity: 0.75;"> — Passed directly to Semantic LLM Reasoning Engine.</span>
-                </div>
-                """, unsafe_allow_html=True)
-
-        with c_right:
-            st.markdown("### 🤖 Step 2: AI Diagnosis & Solution")
-            
-            # Execute Hybrid Diagnosis
-            diag_res = diagnose_case(
-                symptom=str(case_data['symptom']),
-                topology_note=str(case_data['topology_note']),
-                show_output=str(case_data['show_outputs']),
-                case_id=case_data['case_id'],
-                use_live_llm=st.session_state.use_live_llm,
-                api_key=st.session_state.gemini_api_key
-            )
-            diag = diag_res["diagnosis"]
-
-            st.caption(f"Inference Mode: **{diag_res['engine_mode']}**")
-
-            # AI Diagnosis Box
-            st.markdown(f"""
-            <div class="enscribe-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span style="font-family: 'Newsreader', serif; font-size: 1.25rem; color: #D9A05B; font-weight: 600;">Identified Root Cause</span>
-                    <span class="enscribe-pill pill-cyan">{diag['osi_layer']}</span>
-                </div>
-                <div style="font-family: 'Newsreader', serif; font-size: 1.1rem; line-height: 1.5; margin-bottom: 12px;">
-                    {diag['root_cause']}
-                </div>
-                <div style="display: flex; gap: 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; border-top: 1px solid rgba(128,128,128,0.15); padding-top: 8px;">
-                    <div>Confidence: <b style="color: #2E8555;">{diag['confidence']}</b></div>
-                    <div>Ground Truth: <i>{case_data['expected_fault']}</i></div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Quoted Evidence Citation
-            st.markdown("<div style='font-family: monospace; font-size: 0.75rem; text-transform: uppercase;'>Quoted Evidence from Telemetry</div>", unsafe_allow_html=True)
-            st.markdown(f"""
-            <div class="enscribe-terminal" style="border-left: 2px solid #D9A05B; font-weight: 500;">
-                "{diag['evidence']}"
-            </div>
-            """, unsafe_allow_html=True)
-
-            # Next Command
-            st.markdown("<div style='font-family: monospace; font-size: 0.75rem; text-transform: uppercase;'>Next Recommended Verification Command</div>", unsafe_allow_html=True)
-            st.code(diag['next_command'], language="bash")
-
-            # Remediation Commands
-            st.markdown("<div style='font-family: monospace; font-size: 0.75rem; text-transform: uppercase;'>Proposed Cisco IOS Remediation Commands</div>", unsafe_allow_html=True)
-            cli_text = "\n".join(diag['fix_steps'])
-
-            # ==========================================================
-            # STEP 3: HUMAN-IN-THE-LOOP ACTION GATE
-            # ==========================================================
-            st.markdown("---")
-            st.markdown("### 🛡️ Step 3: Human Verification & Sign-Off Gate")
-            st.caption("Review the proposed configuration commands. Choose to approve, edit, or reject.")
-
-            edit_active = st.toggle("✏️ Enable Manual CLI Command Override", value=False)
-
-            if edit_active:
-                edited_cli = st.text_area("Edit Cisco IOS Commands:", value=cli_text, height=110)
-            else:
-                st.code(cli_text, language="cisco")
-                edited_cli = cli_text
-
-            col_b1, col_b2, col_b3 = st.columns(3)
-            with col_b1:
-                if st.button("✅ Approve & Deploy", use_container_width=True, type="primary"):
-                    st.session_state.audit_trail.append({
-                        "case_id": case_data["case_id"],
-                        "decision": "Approved" if not edit_active else "Approved (Edited)",
-                        "reviewer": "Shivanshu Yadav (NetOps)",
-                        "notes": "Verified CLI commands and approved for Packet Tracer deployment.",
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    })
-                    st.success("🎉 Remediation Approved & Recorded in Audit Trail!")
-                    st.balloons()
-
-            with col_b2:
-                if st.button("💾 Save Override", use_container_width=True):
-                    st.session_state.audit_trail.append({
-                        "case_id": case_data["case_id"],
-                        "decision": "Edited",
-                        "reviewer": "Shivanshu Yadav (Senior Lead)",
-                        "notes": f"Human override saved: {edited_cli.splitlines()[-1] if edited_cli else 'Custom fix'}",
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    })
-                    st.warning("💾 Human Override Logged to Audit Trail.")
-
-            with col_b3:
-                if st.button("❌ Reject", use_container_width=True):
-                    st.session_state.audit_trail.append({
-                        "case_id": case_data["case_id"],
-                        "decision": "Rejected",
-                        "reviewer": "Shivanshu Yadav (QA Lead)",
-                        "notes": "Diagnosis rejected due to ambiguity or alternative root cause.",
-                        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    })
-                    st.error("🛑 Diagnosis Rejected & Flagged for Model Safety Review.")
+        # Render Full-Width Feedback Message & Certified CLI Block (Outside narrow button columns)
+        if "last_studio_action" in st.session_state and st.session_state.last_studio_action:
+            action_data = st.session_state.last_studio_action
+            st.markdown("<div style='margin-top: 14px;'></div>", unsafe_allow_html=True)
+            if action_data["type"] == "approved":
+                st.success("🎉 Remediation Approved & Certified for Packet Tracer Deployment!")
+                st.markdown("**📋 Certified Cisco IOS Commands Ready for Deployment:**")
+                st.code(action_data["cli"], language="cisco")
+            elif action_data["type"] == "edited":
+                st.warning("💾 Human Override Logged to Audit Trail.")
+                st.markdown("**📋 Certified Override Commands:**")
+                st.code(action_data["cli"], language="cisco")
+            elif action_data["type"] == "rejected":
+                st.error("🛑 Diagnosis Rejected & Flagged for Model Safety Review.")
 
 
 # ==============================================================================
-# VIEW 2: CUSTOM SANDBOX
+# VIEW 2: METRICS & DISTRIBUTION ANALYTICS
 # ==============================================================================
-elif nav_choice == "2. Custom Telemetry Sandbox":
-    st.markdown("### 🧪 Live Custom Telemetry Diagnostic Sandbox")
-    st.write("Input arbitrary Cisco failure symptoms and show outputs to execute live hybrid diagnosis.")
-
-    c1, c2 = st.columns(2, gap="large")
-    with c1:
-        s_sym = st.text_input("Observed Failure Symptom:", value="Accounting PC cannot ping Default Gateway on sub-interface")
-        s_top = st.text_area("Topology & Configuration Notes:", value="PC IP 192.168.20.50/24; Switch Fa0/5 connected to Router Gi0/0.20", height=100)
-    with c2:
-        s_sho = st.text_area("Cisco IOS Show Commands / Logs:", value="interface GigabitEthernet0/0.20\n ip address 192.168.20.1 255.255.255.0\n (missing encapsulation dot1Q 20)", height=150)
-
-    if st.button("🚀 Execute Live Diagnostic Analysis", type="primary", use_container_width=True):
-        with st.spinner("Analyzing custom telemetry with NetSage AI pipeline..."):
-            res = diagnose_case(
-                s_sym, s_top, s_sho, "CUSTOM-TEST",
-                use_live_llm=st.session_state.use_live_llm,
-                api_key=st.session_state.gemini_api_key
-            )
-            d = res["diagnosis"]
-
-            st.markdown("---")
-            st.markdown(f"""
-            <div class="enscribe-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <span style="font-family: 'Newsreader', serif; font-size: 1.25rem; color: #D9A05B; font-weight: 600;">Custom Diagnostic Finding</span>
-                    <span class="enscribe-pill pill-cyan">{d['osi_layer']}</span>
-                </div>
-                <div style="font-family: 'Newsreader', serif; font-size: 1.1rem; margin-bottom: 8px;">
-                    {d['root_cause']}
-                </div>
-                <div style="font-family: monospace; font-size: 0.78rem; opacity: 0.8;">
-                    Confidence: <b style="color: #2E8555;">{d['confidence']}</b> | Engine: <b>{res['engine_mode']}</b>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown("<small style='font-family: monospace; text-transform: uppercase;'>Quoted Evidence:</small>", unsafe_allow_html=True)
-            st.markdown(f"<div class='enscribe-terminal' style='color: #D9A05B;'>\"{d['evidence']}\"</div>", unsafe_allow_html=True)
-
-            st.markdown("<small style='font-family: monospace; text-transform: uppercase;'>Proposed Remediation Commands:</small>", unsafe_allow_html=True)
-            st.code("\n".join(d["fix_steps"]), language="cisco")
-
-
-# ==============================================================================
-# VIEW 3: 10-LAB STRESS TEST SUITE
-# ==============================================================================
-elif nav_choice == "3. 10-Lab Stress Test Suite":
-    st.markdown("### 🔬 10 Multi-Layer Cisco Packet Tracer Stress-Test Scenarios")
-    st.write("These 10 scenarios are designed to deliberately challenge and evaluate NetSage AI across Layer 2 to Layer 7 failure modes.")
-
-    STRESS_LABS = [
-        {"id": "NET-001", "name": "Lab 1: Sub-interface Administratively Down", "layer": "Layer 3", "type": "Visibility", "challenge": "Detecting sub-interface line protocol failure"},
-        {"id": "NET-004", "name": "Lab 2: OSPF Hello/Dead Timer Mismatch", "layer": "Layer 3", "type": "Multi-Router", "challenge": "Correlating timer mismatch across R1 & R2 interfaces"},
-        {"id": "NET-022", "name": "Lab 3: Extended ACL Dropping HTTPS (Port 443)", "layer": "Layer 4", "type": "Security/ACL", "challenge": "Distinguishing port 80 allow vs port 443 drop"},
-        {"id": "NET-002", "name": "Lab 4: DHCP Scope Pool Exhaustion (APIPA Fallback)", "layer": "Layer 7", "type": "Services", "challenge": "Connecting 169.254.x.x to DHCP pool depletion"},
-        {"id": "NET-015", "name": "Lab 5: Static Route Unreachable Next-Hop IP", "layer": "Layer 3", "type": "Hallucination Test", "challenge": "Tests if AI hallucinates changing subnet mask vs correcting next-hop"},
-        {"id": "NET-016", "name": "Lab 6: Active FTP Control Port 21 ACL Drop", "layer": "Layer 4", "type": "Protocol Logic", "challenge": "Tests dual-port requirement (Data 20 vs Control 21)"},
-        {"id": "NET-026", "name": "Lab 7: Port Security Err-Disabled Safe Recovery", "layer": "Layer 2", "type": "Safety Gate", "challenge": "Ensures AI does NOT reboot the entire switch (safe shutdown bounce)"},
-        {"id": "NET-018", "name": "Lab 8: RADIUS Pre-Shared Secret Mismatch", "layer": "Layer 7", "type": "Wireless Auth", "challenge": "Identifies controller secret mismatch vs hardware fault"},
-        {"id": "NET-020", "name": "Lab 9: Default Gateway Outside /28 Subnet Boundary", "layer": "Layer 3", "type": "Binary Math", "challenge": "Executes CIDR binary subnet calculations"},
-        {"id": "NET-025", "name": "Lab 10: Dynamic ARP Inspection (DAI) Untrusted Trunk", "layer": "Layer 2", "type": "Advanced L2", "challenge": "Detects missing DAI trust on inter-switch trunk"}
-    ]
-
-    for lab in STRESS_LABS:
-        with st.expander(f"📌 {lab['name']} — [{lab['layer']}]", expanded=False):
-            c_l1, c_l2 = st.columns([2, 1])
-            with c_l1:
-                st.markdown(f"**Target Failure:** `{lab['challenge']}`")
-                st.markdown(f"**Evaluation Type:** `{lab['type']}`")
-            with c_l2:
-                if st.button(f"⚡ Run Diagnostic Test on {lab['id']}", key=f"btn_{lab['id']}"):
-                    row_data = df_cases[df_cases["case_id"] == lab['id']].iloc[0]
-                    res = diagnose_case(
-                        str(row_data['symptom']),
-                        str(row_data['topology_note']),
-                        str(row_data['show_outputs']),
-                        lab['id'],
-                        use_live_llm=st.session_state.use_live_llm,
-                        api_key=st.session_state.gemini_api_key
-                    )
-                    st.success(f"Diagnosis Generated via: {res['engine_mode']}")
-                    st.markdown(f"**Root Cause:** {res['diagnosis']['root_cause']}")
-                    st.markdown(f"**Evidence:** `{res['diagnosis']['evidence']}`")
-                    st.code("\n".join(res['diagnosis']['fix_steps']), language="cisco")
-
-
-# ==============================================================================
-# VIEW 4: METRICS & ANALYTICS
-# ==============================================================================
-elif nav_choice == "4. Metrics & Analytics":
+elif nav_choice == "2. Metrics & Distribution Analytics":
     st.markdown("### 📊 System Performance & Distribution Analytics")
 
     if not df_cases.empty:
@@ -843,9 +846,9 @@ elif nav_choice == "4. Metrics & Analytics":
 
 
 # ==============================================================================
-# VIEW 5: RESPONSIBLE AI LOG
+# VIEW 3: RESPONSIBLE AI AUDIT LOG (DETAILED AUDIT TRAIL)
 # ==============================================================================
-elif nav_choice == "5. Responsible AI Audit Log":
+elif nav_choice == "3. Responsible AI Audit Log":
     st.markdown("### 📜 Responsible AI Governance & Audit Log")
     st.write("Complete audit log tracking all human verification decisions, model overrides, and edge-case corrections.")
 
