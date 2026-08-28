@@ -103,10 +103,10 @@ df_cases = load_dataset()
 with st.sidebar:
     st.markdown("""
     <div style="padding: 6px 0;">
-        <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #D9A05B; display: flex; align-items: center; gap: 8px; font-weight: 700;">
-            <span>●</span> netsage.ai
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: #E8A858; display: flex; align-items: center; gap: 8px; font-weight: 700;">
+            <span style="color: #E8A858;">●</span> netsage.ai
         </div>
-        <div style="font-family: 'Newsreader', serif; font-style: italic; font-size: 0.88rem; margin-top: 2px;">
+        <div style="font-family: 'Newsreader', serif; font-style: italic; font-size: 0.92rem; color: #D6D1C4; margin-top: 3px;">
             Cisco AICTE VIP 2026 • AI Track
         </div>
     </div>
@@ -356,8 +356,41 @@ else:
         }
 
         [data-testid="stSidebar"], [data-testid="stSidebar"] > div:first-child {
-            background-color: #0A0A09 !important;
-            border-right: 1px solid #262320 !important;
+            background-color: #12100E !important;
+            border-right: 1px solid #2B2622 !important;
+            color: #EAE7E1 !important;
+        }
+
+        [data-testid="stSidebar"] label,
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] span,
+        [data-testid="stSidebar"] div,
+        [data-testid="stSidebar"] small,
+        [data-testid="stSidebar"] .stRadio label,
+        [data-testid="stSidebar"] .stRadio label p,
+        [data-testid="stSidebar"] .stMarkdown,
+        [data-testid="stSidebar"] .stMarkdown p {
+            color: #E2DDD3 !important;
+            font-weight: 500 !important;
+        }
+
+        [data-testid="stSidebar"] [data-testid="stWidgetLabel"] p,
+        [data-testid="stSidebar"] [data-testid="stWidgetLabel"] label {
+            color: #E8A858 !important;
+            font-weight: 600 !important;
+            font-size: 0.96rem !important;
+        }
+
+        [data-testid="stSidebar"] h1,
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] h3 {
+            color: #F8EFE4 !important;
+            font-weight: 600 !important;
+        }
+
+        [data-testid="stSidebar"] .stCaption,
+        [data-testid="stSidebar"] .stCaption p {
+            color: #ABA59A !important;
         }
 
         h1, h2, h3, .serif-font {
