@@ -12,6 +12,8 @@
 | **Track & Project** | AI Track — Project 2: Applied AI + Network Troubleshooting |
 | **Project Team** | Shivanshu Yadav (Lead Contributor), Vaibhav (Core Contributor) |
 | **GitHub Repository** | [https://github.com/code4nigel/Cisco_VIP_AI_Track_Project.git](https://github.com/code4nigel/Cisco_VIP_AI_Track_Project.git) |
+| **Live Deployed App** | [https://netsage-ai-cisco-shivanshu.streamlit.app/](https://netsage-ai-cisco-shivanshu.streamlit.app/) |
+| **Video Demonstration** | [https://youtu.be/tzZfrcHBuig?si=pF6npNzM32NDCzqO](https://youtu.be/tzZfrcHBuig?si=pF6npNzM32NDCzqO) |
 | **Target Platform** | Cisco Packet Tracer / Cisco IOS Enterprise Environments |
 | **Evaluation Period** | August 2026 |
 | **Industry Mentors** | Mr. Lilesh Pathe & Ms. Kuhu Sabui |

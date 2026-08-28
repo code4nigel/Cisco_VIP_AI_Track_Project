@@ -168,6 +168,11 @@ with st.sidebar:
         <div style="font-size: 0.72rem; text-transform: uppercase; font-family: monospace; opacity: 0.7;">Student Submission</div>
         <div style="font-weight: 700; font-size: 1.0rem; color: #D9A05B; margin-top: 2px;">Shivanshu Yadav</div>
         <div style="font-size: 0.75rem; opacity: 0.8; margin-top: 1px;">Cisco AICTE VIP Program 2026</div>
+        <div style="margin-top: 10px;">
+            <a href="https://youtu.be/tzZfrcHBuig?si=pF6npNzM32NDCzqO" target="_blank" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: rgba(217, 160, 91, 0.15); color: #E8A858; padding: 5px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; border: 1px solid rgba(217, 160, 91, 0.3);">
+                ▶ Watch Video Demo
+            </a>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
