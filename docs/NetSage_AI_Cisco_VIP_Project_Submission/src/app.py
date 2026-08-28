@@ -36,24 +36,15 @@ st.set_page_config(
 ENV_PATH = Path(__file__).parent.parent / ".env"
 load_dotenv(dotenv_path=ENV_PATH)
 
-# Check environment or Streamlit Cloud Secrets
-initial_key = os.environ.get("GEMINI_API_KEY", "")
-if not initial_key:
-    try:
-        if hasattr(st, "secrets") and "GEMINI_API_KEY" in st.secrets:
-            initial_key = st.secrets["GEMINI_API_KEY"]
-    except Exception:
-        pass
-
 # Session state initialization
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark (Espresso)"
 
 if "use_live_llm" not in st.session_state:
-    st.session_state.use_live_llm = bool(initial_key)
+    st.session_state.use_live_llm = bool(os.environ.get("GEMINI_API_KEY"))
 
 if "gemini_api_key" not in st.session_state:
-    st.session_state.gemini_api_key = initial_key
+    st.session_state.gemini_api_key = os.environ.get("GEMINI_API_KEY", "")
 
 if "audit_trail" not in st.session_state:
     st.session_state.audit_trail = [
