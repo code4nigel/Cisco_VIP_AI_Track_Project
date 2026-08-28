@@ -345,6 +345,7 @@ else:
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
+        /* Global text and widget contrast rules */
         .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
             background-color: #0F0E0D !important;
             color: #EAE7E1 !important;
@@ -353,6 +354,58 @@ else:
 
         header[data-testid="stHeader"] {
             background-color: #0F0E0D !important;
+        }
+
+        /* Main area & sidebar widget labels (e.g. Telemetry Source Mode, Select Scenario) */
+        [data-testid="stWidgetLabel"] p,
+        [data-testid="stWidgetLabel"] label,
+        .stSelectbox label p,
+        .stRadio label p,
+        .stTextInput label p,
+        .stTextArea label p {
+            color: #E8A858 !important;
+            font-weight: 600 !important;
+            font-size: 0.96rem !important;
+        }
+
+        /* Radio Options (e.g. Preset Lab Scenarios, Custom Packet Tracer Telemetry) */
+        div[data-testid="stRadio"] label,
+        div[data-testid="stRadio"] label p,
+        div[data-testid="stRadio"] span {
+            color: #E6E2D8 !important;
+            font-weight: 500 !important;
+        }
+
+        /* Selectboxes & Dropdowns */
+        div[data-baseweb="select"] span,
+        div[data-baseweb="select"] div,
+        div[data-baseweb="select"] input {
+            color: #F0ECE1 !important;
+        }
+
+        div[data-baseweb="popover"],
+        div[data-baseweb="popover"] ul,
+        div[data-baseweb="menu"] {
+            background-color: #1A1816 !important;
+            color: #F0ECE1 !important;
+            border: 1px solid #332F2B !important;
+        }
+
+        div[data-baseweb="menu"] li,
+        div[data-baseweb="menu"] li div,
+        div[data-baseweb="menu"] li span {
+            color: #EAE7E1 !important;
+        }
+
+        /* General Markdown paragraphs & bold text */
+        .stMarkdown p,
+        .stMarkdown span,
+        .stMarkdown li {
+            color: #E2DDD3 !important;
+        }
+
+        .stMarkdown strong {
+            color: #F8EFE4 !important;
         }
 
         [data-testid="stSidebar"], [data-testid="stSidebar"] > div:first-child {

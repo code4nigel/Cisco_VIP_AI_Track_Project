@@ -11,6 +11,7 @@
 - **Program:** Cisco AICTE Virtual Internship Program 2026
 - **Problem Statement:** Project 2 — Applied AI + Network Troubleshooting
 - **GitHub Repository:** [https://github.com/code4nigel/Cisco_VIP_AI_Track_Project.git](https://github.com/code4nigel/Cisco_VIP_AI_Track_Project.git)
+- **Live Deployed Application:** [https://netsage-ai-cisco-shivanshu.streamlit.app/](https://netsage-ai-cisco-shivanshu.streamlit.app/)
 - **Evaluation Submission Deadline:** 25th August 2026
 - **Tech Guides:** Mr. Lilesh Pathe & Ms. Kuhu Sabui
 

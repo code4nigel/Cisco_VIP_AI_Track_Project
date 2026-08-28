@@ -2,7 +2,8 @@
 
 **Cisco AICTE Virtual Internship Program 2026 — AI Track (Project 2)**  
 **Student Submission:** Shivanshu Yadav  
-**Repository:** [https://github.com/code4nigel/Cisco_VIP_AI_Track_Project.git](https://github.com/code4nigel/Cisco_VIP_AI_Track_Project.git)
+**Repository:** [https://github.com/code4nigel/Cisco_VIP_AI_Track_Project.git](https://github.com/code4nigel/Cisco_VIP_AI_Track_Project.git)  
+**Live Deployed Application:** [https://netsage-ai-cisco-shivanshu.streamlit.app/](https://netsage-ai-cisco-shivanshu.streamlit.app/)
 
 ---
 
