@@ -16,7 +16,7 @@ To mitigate hallucinations and prevent dangerous autonomous commands on network 
 1. **Deterministic Rule Checker (`src/checker.py`)**: Fast, regular-expression-based engine that flags static configuration errors (such as administratively shutdown interfaces, missing NAT overload keywords, OSPF timer mismatches, and subnet boundary errors) with 100% mathematical certainty.
 2. **Structured LLM Diagnostic Reasoning (`src/engine.py` & `prompts/diagnose_prompt.md`)**: Synthesizes complex multi-sentence symptoms and verbose CLI outputs using Google Gemini (`gemini-2.5-flash` / `gemini-1.5-flash`), enforcing a strict 6-field JSON output schema validated by Pydantic.
 3. **Human-in-the-Loop (HITL) Verification Gate (`src/app.py`)**: A Streamlit operations dashboard where network engineers inspect evidence, edit proposed CLI commands, and explicitly approve or reject remediation before deployment.
-4. **Responsible AI Governance (`docs/model_audit_log.md`)**: A verifiable audit log documenting human review decisions, agreement metrics, and 5 detailed human-override case studies.
+4. **Responsible AI Governance (`documents/model_audit_log.md`)**: A verifiable audit log documenting human review decisions, agreement metrics, and 5 detailed human-override case studies.
 
 ---
 
@@ -55,7 +55,7 @@ To mitigate hallucinations and prevent dangerous autonomous commands on network 
                                v
 +-------------------------------------------------------------+
 |                  4. AUDIT & GOVERNANCE TIER                 |
-|         docs/model_audit_log.md (Responsible AI Log)        |
+|      documents/model_audit_log.md (Responsible AI Log)      |
 +-------------------------------------------------------------+
 ```
 
@@ -68,6 +68,11 @@ To mitigate hallucinations and prevent dangerous autonomous commands on network 
 |-- .gitignore                               # Git ignore configuration (.venv, .env, seabed)
 |-- README.md                                # Project documentation and user guide
 |-- requirements.txt                         # Python dependencies
+|
+|-- Demo video, Live Active Portal and Github Link/
+|   |-- Demo_Video_Youtube_Link.txt          # Recorded demo video walkthrough
+|   |-- Github_Repo_Link.txt                 # Remote repository URL
+|   `-- Live_Deployed_Solution_Link.txt      # Public Streamlit Cloud deployment
 |
 |-- data/
 |   `-- cases.csv                            # 30 structured Cisco Packet Tracer test cases (L2-L7)
@@ -84,10 +89,14 @@ To mitigate hallucinations and prevent dangerous autonomous commands on network 
 |-- tests/
 |   `-- test_checker.py                      # Automated test suite evaluating checker accuracy
 |
-`-- docs/
+`-- documents/
     |-- model_audit_log.md                   # Responsible AI log with 5 documented human overrides
-    |-- Project_Summary_Document.md          # Technical summary and evaluation report
-    |-- NetSage_AI_Project_Summary_Document.docx # Formatted Word submission report
+    |-- Member_Report_Shivanshu_Yadav.docx   # Individual project submission report
+    |-- Member_Report_Shivanshu_Yadav.md     # Markdown submission report for Shivanshu Yadav
+    |-- Member_Report_Vaibhav.docx           # Individual project report for team member
+    |-- Member_Report_Vaibhav.md             # Markdown report for team member
+    |-- NetSage_AI_Master_Project_Report.docx# Comprehensive master project report
+    |-- NetSage_AI_Master_Project_Report.md  # Comprehensive markdown master report
     `-- Packet_Tracer_10_Lab_Scenarios.md    # 10-Lab replication and stress-test guide
 ```
 
@@ -161,7 +170,7 @@ python tests/test_checker.py
 3. **Human-in-the-Loop Sign-Off**:
    The operator reviews the proposed Cisco IOS commands and chooses to **Approve & Deploy**, **Edit Commands** (manual override), or **Reject Diagnosis**.
 4. **Audit Trail**:
-   All operator decisions are recorded in `docs/model_audit_log.md` and can be exported as CSV from the dashboard.
+   All operator decisions are recorded in `documents/model_audit_log.md` and can be exported as CSV from the dashboard.
 
 ---
 
