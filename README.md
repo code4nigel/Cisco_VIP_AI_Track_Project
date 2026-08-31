@@ -90,14 +90,10 @@ To mitigate hallucinations and prevent dangerous autonomous commands on network 
 |   `-- test_checker.py                      # Automated test suite evaluating checker accuracy
 |
 `-- documents/
-    |-- model_audit_log.md                   # Responsible AI log with 5 documented human overrides
-    |-- Member_Report_Shivanshu_Yadav.docx   # Individual project submission report
-    |-- Member_Report_Shivanshu_Yadav.md     # Markdown submission report for Shivanshu Yadav
-    |-- Member_Report_Vaibhav.docx           # Individual project report for team member
-    |-- Member_Report_Vaibhav.md             # Markdown report for team member
-    |-- NetSage_AI_Master_Project_Report.docx# Comprehensive master project report
-    |-- NetSage_AI_Master_Project_Report.md  # Comprehensive markdown master report
-    `-- Packet_Tracer_10_Lab_Scenarios.md    # 10-Lab replication and stress-test guide
+    |-- Member_Report_Shivanshu_Yadav.docx   # Individual technical contribution report (Shivanshu Yadav)
+    |-- Member_Report_Vaibhav.docx           # Individual technical contribution report (Vaibhav)
+    |-- Member_Report_Sudheer.docx           # Individual technical contribution report (Sudheer)
+    `-- NetSage_AI_Master_Project_Report.docx# Comprehensive master project report (All members)
 ```
 
 ---
@@ -185,9 +181,13 @@ In compliance with Cisco AICTE Responsible AI guidelines, NetSage AI documents 5
 
 ---
 
-## 9. Author Information
+## 9. Team & Author Information
 
-- **Student Name:** Shivanshu Yadav
 - **Program:** Cisco AICTE Virtual Internship Program 2026
 - **Track:** AI Track (Project 2: Applied AI + Network Troubleshooting)
+- **Project Team:**
+  - **Shivanshu Yadav (Lead Contributor):** Lead System Architect, AI Diagnostic Engine & HITL Platform Lead
+  - **Vaibhav (Core Contributor):** Network Domain, Data Engineering & Verification Lead
+  - **Sudheer (Core Contributor):** Network Simulation, Lab Replication & Responsible AI Governance Lead
+- **Industry Mentors:** Mr. Lilesh Pathe & Ms. Kuhu Sabui
 - **Submission Date:** August 2026
