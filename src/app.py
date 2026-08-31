@@ -141,23 +141,58 @@ with st.sidebar:
     st.session_state.use_live_llm = live_toggle
     
     if live_toggle:
-        user_key = st.text_input(
-            "Gemini API Key:",
-            value=st.session_state.gemini_api_key,
-            type="password",
-            placeholder="AIzaSy...",
-            help="Your API key is automatically saved locally to .env and will persist across refreshes."
-        )
-        if user_key != st.session_state.gemini_api_key:
-            st.session_state.gemini_api_key = user_key
-            # Persist key to .env
-            try:
-                if not ENV_PATH.exists():
-                    ENV_PATH.touch()
-                set_key(str(ENV_PATH), "GEMINI_API_KEY", user_key)
-                st.success("API Key saved to .env!")
-            except Exception:
-                pass
+        if st.session_state.gemini_api_key:
+            st.markdown("""
+            <div style="background: rgba(46, 133, 85, 0.12); border: 1px solid rgba(46, 133, 85, 0.3); border-radius: 6px; padding: 8px 12px; margin: 8px 0;">
+                <div style="color: #4EBA7D; font-weight: 600; font-size: 0.82rem; display: flex; align-items: center; gap: 6px;">
+                    <span>🔒</span> Backend API Key Protected
+                </div>
+                <div style="font-family: monospace; font-size: 0.76rem; color: #8A857C; margin-top: 2px;">
+                    Status: ●●●●●●●●●● (Loaded from .env)
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            with st.expander("Update / Change Key", expanded=False):
+                new_key = st.text_input(
+                    "Enter New Gemini API Key:",
+                    value="",
+                    type="password",
+                    placeholder="Paste new key to replace...",
+                    help="Your new key is saved directly to server-side .env and is never displayed."
+                )
+                if st.button("Save New Key", use_container_width=True):
+                    if new_key.strip():
+                        st.session_state.gemini_api_key = new_key.strip()
+                        try:
+                            if not ENV_PATH.exists():
+                                ENV_PATH.touch()
+                            set_key(str(ENV_PATH), "GEMINI_API_KEY", new_key.strip())
+                            st.success("API Key updated and stored securely!")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error saving key: {e}")
+        else:
+            st.warning("⚠️ No backend API key found. Please provide one below:")
+            input_key = st.text_input(
+                "Gemini API Key:",
+                value="",
+                type="password",
+                placeholder="AIzaSy...",
+                help="Key is stored locally in .env and will not be displayed on screen."
+            )
+            if st.button("Save Key to Backend", use_container_width=True):
+                if input_key.strip():
+                    st.session_state.gemini_api_key = input_key.strip()
+                    try:
+                        if not ENV_PATH.exists():
+                            ENV_PATH.touch()
+                        set_key(str(ENV_PATH), "GEMINI_API_KEY", input_key.strip())
+                        st.success("Key saved to backend .env!")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error saving key: {e}")
+                        
         st.caption("Model: `gemini-2.5-flash` with structured Pydantic JSON schema.")
     else:
         st.caption("Running in offline deterministic expert synthesis mode.")
